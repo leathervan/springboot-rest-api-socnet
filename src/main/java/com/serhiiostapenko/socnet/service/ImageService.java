@@ -76,7 +76,7 @@ public class ImageService extends BasicService {
     public Image getImageToPerson(Principal principal) {
         Person person = getPersonFromPrincipal(personRepo, principal);
 
-        Image Image = imageRepo.findByUserId(person.getId()).orElse(null);
+        Image Image = imageRepo.findByUserId(person.getId()).orElseThrow(() -> new ImageNotFoundException("Cannot find image to person: " + person.getUsername()));
         if (!ObjectUtils.isEmpty(Image)) {
             Image.setImageBytes(decompressBytes(Image.getImageBytes()));
         }

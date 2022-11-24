@@ -4,12 +4,14 @@ import com.serhiiostapenko.socnet.dto.request.LoginRequest;
 import com.serhiiostapenko.socnet.dto.request.SignupRequest;
 import com.serhiiostapenko.socnet.dto.response.JWTTokenSuccessResponse;
 import com.serhiiostapenko.socnet.dto.response.MessageResponse;
+import com.serhiiostapenko.socnet.exception.UserExistException;
 import com.serhiiostapenko.socnet.security.JWTTokenProvider;
 import com.serhiiostapenko.socnet.security.SecurityConstants;
 import com.serhiiostapenko.socnet.service.PersonService;
 import com.serhiiostapenko.socnet.validator.ResponseErrorValidator;
 import com.serhiiostapenko.socnet.validator.UserExistValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,7 +62,11 @@ public class AuthController {
         ResponseEntity<Object> errors = validator.mapValidationService(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
-        personService.createPerson(signupRequest);
-        return ResponseEntity.ok(new MessageResponse("Success user registration"));
+        try {
+            personService.createPerson(signupRequest);
+            return new ResponseEntity<>(new MessageResponse("Success user registration"), HttpStatus.OK);
+        } catch (UserExistException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }

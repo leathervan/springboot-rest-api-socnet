@@ -43,7 +43,7 @@ public class PostService extends BasicService {
         post.setLocation(postDto.getLocation());
         post.setLikes(0);
 
-        log.info("Saving post for user" + person.getUsername());
+        log.info("Saving post for user " + person.getUsername());
 
         return postRepo.save(post);
     }

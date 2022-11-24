@@ -11,5 +11,5 @@ public class SecurityConstants {
 
     public static final String CONTENT_TYPE = "application/json";
 
-    public static final long EXPIRATION_TIME = 600_000;
+    public static final long EXPIRATION_TIME = 6_000_000;
 }

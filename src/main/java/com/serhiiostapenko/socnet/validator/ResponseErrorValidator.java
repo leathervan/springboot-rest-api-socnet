@@ -1,5 +1,6 @@
 package com.serhiiostapenko.socnet.validator;
 
+import com.serhiiostapenko.socnet.dto.response.MessageResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import java.util.Map;
 @Service
 public class ResponseErrorValidator {
 
-    public ResponseEntity<Object> mapValidationService(BindingResult bindingResult) {
+    public ResponseEntity mapValidationService(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
 
@@ -27,7 +28,7 @@ public class ResponseErrorValidator {
                 errors.put(error.getField(), error.getDefaultMessage());
             }*/
 
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse(errors.values()), HttpStatus.BAD_REQUEST);
         }
         return null;
     }
