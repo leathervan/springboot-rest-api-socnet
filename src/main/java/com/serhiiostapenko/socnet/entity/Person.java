@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.serhiiostapenko.socnet.entity.enums.ERole;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -36,6 +37,11 @@ public class Person implements UserDetails {
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER, mappedBy = "person", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "peopleLikedPost")
+    private Set<Post> likedPosts = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER, mappedBy = "person", orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 

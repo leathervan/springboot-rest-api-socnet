@@ -10,6 +10,7 @@ import com.serhiiostapenko.socnet.repo.PersonRepo;
 import com.serhiiostapenko.socnet.repo.PostRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -38,6 +39,7 @@ public class ImageService extends BasicService {
         this.personRepo = personRepo;
         this.postRepo = postRepo;
     }
+
     @Transactional
     public Image uploadImageToPerson(MultipartFile file, Principal principal) throws IOException {
         Person person = getPersonFromPrincipal(personRepo, principal);
@@ -54,6 +56,7 @@ public class ImageService extends BasicService {
         Image.setName(file.getOriginalFilename());
         return imageRepo.save(Image);
     }
+
     @Transactional
     public Image uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
         Person person = getPersonFromPrincipal(personRepo, principal);
@@ -61,7 +64,7 @@ public class ImageService extends BasicService {
 
         Optional<Image> imageOptional = imageRepo.findByPostId(post.getId());
         Image image;
-        if(imageOptional.isEmpty()){
+        if (imageOptional.isEmpty()) {
             image = new Image();
             image.setPostId(post.getId());
         } else image = imageOptional.get();
@@ -77,6 +80,15 @@ public class ImageService extends BasicService {
         Person person = getPersonFromPrincipal(personRepo, principal);
 
         Image Image = imageRepo.findByUserId(person.getId()).orElseThrow(() -> new ImageNotFoundException("Cannot find image to person: " + person.getUsername()));
+        if (!ObjectUtils.isEmpty(Image)) {
+            Image.setImageBytes(decompressBytes(Image.getImageBytes()));
+        }
+
+        return Image;
+    }
+
+    public Image getImageToPerson(Long personId) {
+        Image Image = imageRepo.findByUserId(personId).orElseThrow(() -> new ImageNotFoundException("Cannot find image to person with id: " + personId));
         if (!ObjectUtils.isEmpty(Image)) {
             Image.setImageBytes(decompressBytes(Image.getImageBytes()));
         }

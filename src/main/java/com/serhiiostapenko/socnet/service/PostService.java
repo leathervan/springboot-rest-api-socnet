@@ -1,15 +1,14 @@
 package com.serhiiostapenko.socnet.service;
 
 import com.serhiiostapenko.socnet.dto.PostDto;
-import com.serhiiostapenko.socnet.entity.Image;
-import com.serhiiostapenko.socnet.entity.Person;
-import com.serhiiostapenko.socnet.entity.Post;
+import com.serhiiostapenko.socnet.entity.*;
 import com.serhiiostapenko.socnet.exception.PostNotFoundException;
 import com.serhiiostapenko.socnet.repo.ImageRepo;
 import com.serhiiostapenko.socnet.repo.PersonRepo;
 import com.serhiiostapenko.socnet.repo.PostRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,6 @@ public class PostService extends BasicService {
         post.setTitle(postDto.getTitle());
         post.setCaption(postDto.getCaption());
         post.setLocation(postDto.getLocation());
-        post.setLikes(0);
 
         log.info("Saving post for user " + person.getUsername());
 
@@ -62,25 +60,23 @@ public class PostService extends BasicService {
         return postRepo.findAllByPersonOrderByCreatedDateDesc(person);
     }
 
+    public List<Post> getAllPostsByPersonId(long id) {
+        Person person = personRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException("User with id: " + id + " not found"));;
+        return postRepo.findAllByPersonOrderByCreatedDateDesc(person);
+    }
+
     @Transactional
-    public Post likedPost(Long id, String username) {
-        Post post = postRepo.findById(id)
-                .orElseThrow(() -> new PostNotFoundException("Post cannot be found"));
+    public Post likedPost(Long id, Principal principal) {
+        Person person = getPersonFromPrincipal(personRepo, principal);
+        Post post = postRepo.findById(id).orElseThrow(() -> new PostNotFoundException("Post cannot be found"));
 
-        Optional<String> userLiked = post.getLikedUsers()
-                .stream()
-                .filter(u -> u.equals(username)).findAny();
+        if (post.getPeopleLikedPost().contains(person)) post.removeLike(person);
+        else post.addLike(person);
 
-        if (userLiked.isPresent()) {
-            post.setLikes(post.getLikes() - 1);
-            post.getLikedUsers().remove(username);
-        } else {
-            post.setLikes(post.getLikes() + 1);
-            post.getLikedUsers().add(username);
-        }
-
+        personRepo.save(person);
         return postRepo.save(post);
     }
+
     @Transactional
     public void deletePost(Long id) {
         Optional<Image> image = imageRepo.findByPostId(id);

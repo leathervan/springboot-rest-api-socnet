@@ -13,10 +13,8 @@ public class Comment {
     private Long id;
     @ManyToOne(fetch = FetchType.EAGER)
     private Post post;
-    @Column(nullable = false)
-    private String username;
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Person person;
     @Column(nullable = false, columnDefinition = "text")
     private String message;
     @Column(updatable = false)

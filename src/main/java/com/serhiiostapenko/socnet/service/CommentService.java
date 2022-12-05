@@ -38,8 +38,7 @@ public class CommentService extends BasicService {
 
         Comment comment = new Comment();
         comment.setPost(post);
-        comment.setUserId(person.getId());
-        comment.setUsername(person.getUsername());
+        comment.setPerson(person);
         comment.setMessage(commentDto.getMessage());
 
         log.info("Saving comment for post with id: " + post.getId());

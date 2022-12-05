@@ -55,6 +55,16 @@ public class ImageController {
         }
     }
 
+    @GetMapping("/avatar/{id}")
+    public ResponseEntity<Object> getImageToPerson(@PathVariable("id") long id, Principal principal) {
+        try {
+            Image image = imageService.getImageToPerson(id);
+            return new ResponseEntity<>(image, HttpStatus.OK);
+        } catch (ImageNotFoundException | UsernameNotFoundException e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<Object> getImageToPost(@PathVariable("postId") long postId) {
         try {

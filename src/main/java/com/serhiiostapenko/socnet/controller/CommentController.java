@@ -1,9 +1,10 @@
 package com.serhiiostapenko.socnet.controller;
 
 import com.serhiiostapenko.socnet.dto.CommentDto;
+import com.serhiiostapenko.socnet.dto.PostDto;
 import com.serhiiostapenko.socnet.entity.Comment;
-import com.serhiiostapenko.socnet.facade.CommentFacade;
 import com.serhiiostapenko.socnet.dto.response.MessageResponse;
+import com.serhiiostapenko.socnet.entity.Post;
 import com.serhiiostapenko.socnet.service.CommentService;
 import com.serhiiostapenko.socnet.validator.ResponseErrorValidator;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,12 +24,10 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class CommentController {
     private final CommentService commentService;
-    private final CommentFacade commentFacade;
     private final ResponseErrorValidator errorValidator;
 
-    public CommentController(CommentService commentService, CommentFacade commentFacade, ResponseErrorValidator errorValidator) {
+    public CommentController(CommentService commentService, ResponseErrorValidator errorValidator) {
         this.commentService = commentService;
-        this.commentFacade = commentFacade;
         this.errorValidator = errorValidator;
     }
 
@@ -40,17 +40,16 @@ public class CommentController {
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
         Comment comment = commentService.createComment(postId, commentDto, principal);
-        CommentDto createdCommentDto = commentFacade.commentToCommentDto(comment);
 
-        return new ResponseEntity<>(createdCommentDto, HttpStatus.OK);
+        return new ResponseEntity<>(new CommentDto(comment), HttpStatus.OK);
     }
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<List<CommentDto>> getAllCommentsByPost(@PathVariable("postId") long postId) {
-        List<CommentDto> commentDtos = commentService.getAllCommentForPost(postId)
-                .stream()
-                .map(commentFacade::commentToCommentDto)
-                .collect(Collectors.toList());
+        List<CommentDto> commentDtos = new ArrayList<>();
+        for (Comment comment : commentService.getAllCommentForPost(postId)) {
+            commentDtos.add(new CommentDto(comment));
+        }
 
         return new ResponseEntity<>(commentDtos, HttpStatus.OK);
     }

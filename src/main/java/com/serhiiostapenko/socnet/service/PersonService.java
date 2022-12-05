@@ -49,7 +49,6 @@ public class PersonService extends BasicService {
 
         person.setUsername(personDto.getUsername());
         person.setBio(personDto.getBio());
-        person.setPassword(passwordEncoder.encode(personDto.getPassword()));
 
         return personRepo.save(person);
     }

@@ -2,7 +2,6 @@ package com.serhiiostapenko.socnet.controller;
 
 import com.serhiiostapenko.socnet.dto.PersonDto;
 import com.serhiiostapenko.socnet.entity.Person;
-import com.serhiiostapenko.socnet.facade.PersonFacade;
 import com.serhiiostapenko.socnet.service.PersonService;
 import com.serhiiostapenko.socnet.validator.ResponseErrorValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,30 +19,26 @@ import java.security.Principal;
 @CrossOrigin
 public class PersonController {
     private final PersonService personService;
-    private final PersonFacade personFacade;
     private final ResponseErrorValidator errorValidator;
 
     @Autowired
-    public PersonController(PersonService personService, PersonFacade personFacade, ResponseErrorValidator errorValidator) {
+    public PersonController(PersonService personService, ResponseErrorValidator errorValidator) {
         this.personService = personService;
-        this.personFacade = personFacade;
         this.errorValidator = errorValidator;
     }
 
     @GetMapping("/")
     public ResponseEntity<PersonDto> getCurrentPerson(Principal principal){
         Person person = personService.getPersonFromPrincipal(principal);
-        PersonDto personDto = personFacade.personToPersonDto(person);
 
-        return new ResponseEntity<>(personDto, HttpStatus.OK);
+        return new ResponseEntity<>(new PersonDto(person), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getPersonById(@PathVariable("id") long id){
         Person person = personService.getPersonById(id);
-        PersonDto personDto = personFacade.personToPersonDto(person);
 
-        return new ResponseEntity<>(personDto, HttpStatus.OK);
+        return new ResponseEntity<>(new PersonDto(person), HttpStatus.OK);
     }
 
     @PostMapping("/update")
@@ -52,8 +47,7 @@ public class PersonController {
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
         Person person = personService.updatePerson(personDto, principal);
-        PersonDto updatedPersonDto = personFacade.personToPersonDto(person);
 
-        return new ResponseEntity<>(updatedPersonDto, HttpStatus.OK);
+        return new ResponseEntity<>(new PersonDto(person), HttpStatus.OK);
     }
 }
